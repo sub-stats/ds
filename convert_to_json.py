@@ -4,8 +4,8 @@ import json
     Converts files from https://files.pushshift.io/reddit/comments/ to actual JSON for importing to Pandas.
     Need to add extensibility for large amount of files.
 """
-fname_load = 'RS_v2_2008-01'
-fname_save = 'RS_v2_2008-01.json'
+fname_load = 'sample.json'
+fname_save = 'sample-trimmed.json'
 dictList = []
 with open(fname_load, 'r') as f, open(fname_save, 'w') as s:
     for line in f:
