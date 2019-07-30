@@ -104,7 +104,7 @@ def get_subreddit_comments_per_day(subreddit, start):
     daily_aggs = pd.DataFrame(r.json()['aggs']['created_utc'])
     daily_aggs['subreddit'] = subreddit
     daily_aggs['key'] = pd.to_datetime(daily_aggs['key'], unit='s')
-    daily_aggs = daily_aggs.drop(columns='Unnamed: 0')
+    # daily_aggs = daily_aggs.drop(columns='Unnamed: 0')
     daily_aggs = daily_aggs.rename(columns={'doc_count': 'comment_count', 'key': 'date'})
     return daily_aggs
 
