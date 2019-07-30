@@ -129,6 +129,19 @@ def save_comments_per_day_csv():
         comments_per_day = comments_per_day.append(get_subreddit_comments_per_day(sub, start))
     comments_per_day.to_csv('past_90_days_comments_per_day.csv')
 
+def get_subreddit_info():
+    start = time.time()
+    subreddits_info = pd.DataFrame()
+    for sub in subs:
+        now = time.time()
+        if now-start < 1:
+            time.sleep(0.1)
+            now=time.time()
+        url = f'https://api.pushshift.io/reddit/subreddit/search/?subreddit={sub}'
+        r = requests.get(url)
+        sub_info = r.json()
+        print(sub_info)
+
 save_comments_per_day_csv()
 # save_posts_per_day_csv()
 # scrape_submissions()
