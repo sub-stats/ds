@@ -83,8 +83,16 @@ def get_trending_score():
 def get_average_comment_count_per_post():
     pass
 
-def get_subreddit_posts_per_day():
-    pass
+def get_subreddit_posts_per_day(subreddit, start):
+    now = time.time()
+    if now-start < 1:
+        time.sleep(0.1)
+        now=time.time()
+    url = f'https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}&after=90d&aggs=created_utc&frequency=day&size=0'
+    r = requests.get(url)
+    daily_aggs = pd.DataFrame(r.json()['aggs'])
+    daily_aggs['subreddit'] = subreddit
+    return daily_aggs
 
 def get_subreddit_unique_users():
     pass
@@ -92,7 +100,13 @@ def get_subreddit_unique_users():
 def get_post_activity():
     pass
 
-submissions = pd.read_csv('4-30-to-7-29-submissions.csv')
-scrape_comments({ "id": submissions['id'].values, "num_comments": submissions['num_comments'].values })
+# submissions = pd.read_csv('4-30-to-7-29-submissions.csv')
+# scrape_comments({ "id": submissions['id'].values, "num_comments": submissions['num_comments'].values })
+def save_posts_per_day_csv():
+    posts_per_day = pd.DataFrame()
+    for sub in subs:
+        posts_per_day = posts_per_day.append(get_subreddit_posts_per_day(sub, time.time()+1))
+    posts_per_day.to_csv('past_90_days_post_per_day.csv')
 
+save_posts_per_day_csv()
 # scrape_submissions()
