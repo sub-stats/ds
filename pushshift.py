@@ -15,7 +15,7 @@ def search_submissions(subreddit, after, before, start):
     while now-start < 1:
         time.sleep(0.1)
         now = time.time()
-    url = f'https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}&after={after}&before={before}&size=500'
+    url = f'https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}&after={after}&before={before}&size=500&sort=desc&sort_type=score'
     # print(url)
     r = requests.get(url)
     # print("Response: " + r.text)
@@ -39,14 +39,34 @@ def scrape_submissions():
             # search_submissions(sub, after, before, start)
     sub_dfs.to_csv('4-30-to-7-29-submissions.csv')
 
-def search_comments(submission_id, start):
+def get_comment_ids(submission_id, start):
     now = time.time()
     while now-start < 1:
         time.sleep(0.1)
         now = time.time()
     url = f'https://api.pushshift.io/reddit/submission/comment_ids/{submission_id}'
     r = requests.get(url)
-    submissions = r.json()
-    com_df = pd.DataFrame(submissions['data'])
+    comment_ids = r.json()['data'][:10]
     start = time.time()
-    return com_df.copy()
+    return comment_ids
+
+def search_comment(comment_ids, start):
+    now = time.time()
+    while now-start < 1:
+        time.sleep(0.1)
+        now = time.time()
+    url = f'https://api.pushshift.io/reddit/search/comment/?ids={",".join(comment_ids)}'
+    r = requests.get(url)
+    comments = pd.DataFrame(r.json()['data'])
+    start = time.time()
+    return comments
+
+def scrape_comments(submission_ids):
+    start = time.time()
+    com_df = pd.DataFrame()
+    for id in submission_ids:
+        comment_ids = get_comment_ids(id, start)
+        com_df = com_df.append(search_comment(comment_ids, start))
+
+
+# scrape_submissions()
