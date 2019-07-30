@@ -50,23 +50,37 @@ def get_comment_ids(submission_id, start):
     start = time.time()
     return comment_ids
 
-def search_comment(comment_ids, start):
+def search_comments(submission_id, start, count):
     now = time.time()
+    count = count + 1
+    if count % 100 == 0:
+        print(count)
     while now-start < 1:
         time.sleep(0.1)
         now = time.time()
-    url = f'https://api.pushshift.io/reddit/search/comment/?ids={",".join(comment_ids)}'
+    url = f'https://api.pushshift.io/reddit/search/comment/?link_id={submission_id}'
     r = requests.get(url)
+    print(len(r.json()['data']))
     comments = pd.DataFrame(r.json()['data'])
     start = time.time()
-    return comments
+    return comments, count
 
-def scrape_comments(submission_ids):
+def scrape_comments(submissions):
     start = time.time()
+    count = 0
     com_df = pd.DataFrame()
-    for id in submission_ids:
-        comment_ids = get_comment_ids(id, start)
-        com_df = com_df.append(search_comment(comment_ids, start))
+    for index in range(len(submissions['id'])):
+        if submissions['num_comments'][index] > 2:
+            new_df, count = search_comments(submissions['id'][index], start, count)
+            com_df = com_df.append(new_df)
+            if count % 100 == 0:
+                com_df.to_csv('4-30-to-7-29-comments.csv')
+    com_df.to_csv('4-30-to-7-29-comments.csv')
 
+
+
+
+submissions = pd.read_csv('4-30-to-7-29-submissions.csv')
+scrape_comments({ "id": submissions['id'].values, "num_comments": submissions['num_comments'].values })
 
 # scrape_submissions()
