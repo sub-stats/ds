@@ -90,7 +90,7 @@ def get_subreddit_posts_per_day(subreddit, start):
         now=time.time()
     url = f'https://api.pushshift.io/reddit/search/submission/?subreddit={subreddit}&after=90d&aggs=created_utc&frequency=day&size=0'
     r = requests.get(url)
-    daily_aggs = pd.DataFrame(r.json()['aggs'])
+    daily_aggs = pd.DataFrame(r.json()['aggs']['created_utc'])
     daily_aggs['subreddit'] = subreddit
     return daily_aggs
 
