@@ -77,8 +77,20 @@ def scrape_comments(submissions):
                 com_df.to_csv('4-30-to-7-29-comments.csv')
     com_df.to_csv('4-30-to-7-29-comments.csv')
 
+def get_trending_score():
+    pass
 
+def get_average_comment_count_per_post():
+    pass
 
+def get_subreddit_posts_per_day():
+    pass
+
+def get_subreddit_unique_users():
+    pass
+
+def get_post_activity():
+    pass
 
 submissions = pd.read_csv('4-30-to-7-29-submissions.csv')
 scrape_comments({ "id": submissions['id'].values, "num_comments": submissions['num_comments'].values })
