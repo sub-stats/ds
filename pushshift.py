@@ -2,6 +2,8 @@ import datetime
 import time
 import requests
 import pandas as pd
+import os
+import praw
 
 
 """
@@ -137,11 +139,12 @@ def get_subreddit_info():
         if now-start < 1:
             time.sleep(0.1)
             now=time.time()
-        url = f'https://api.pushshift.io/reddit/subreddit/search/?subreddit={sub}'
+        url = f'https://api.pushshift.io/reddit/search/subreddit/?subreddit={sub}'
         r = requests.get(url)
         sub_info = r.json()
         print(sub_info)
 
-save_comments_per_day_csv()
+get_subreddit_info()
+# save_comments_per_day_csv()
 # save_posts_per_day_csv()
 # scrape_submissions()
