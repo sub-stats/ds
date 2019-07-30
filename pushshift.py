@@ -108,5 +108,8 @@ def save_posts_per_day_csv():
         posts_per_day = posts_per_day.append(get_subreddit_posts_per_day(sub, time.time()+1))
     posts_per_day.to_csv('past_90_days_post_per_day.csv')
 
-save_posts_per_day_csv()
+def save_comments_per_day_csv():
+    pass
+
+# save_posts_per_day_csv()
 # scrape_submissions()
