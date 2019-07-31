@@ -4,6 +4,9 @@ import requests
 import pandas as pd
 import os
 import praw
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 """
@@ -131,18 +134,22 @@ def save_comments_per_day_csv():
         comments_per_day = comments_per_day.append(get_subreddit_comments_per_day(sub, start))
     comments_per_day.to_csv('past_90_days_comments_per_day.csv')
 
-# def get_subreddit_info():
-#     start = time.time()
-#     subreddits_info = pd.DataFrame()
-#     for sub in subs:
-#         now = time.time()
-#         if now-start < 1:
-#             time.sleep(0.1)
-#             now=time.time()
-#         url = f'https://api.pushshift.io/reddit/search/subreddit/?subreddit={sub}'
-#         r = requests.get(url)
-#         sub_info = r.json()
-#         print(sub_info)
+
+def get_subreddit_info():
+    user_agent = "LambdaAnalysisClient/0.1 by " + os.getenv("REDDIT_USERNAME")
+    reddit = praw.Reddit(client_id=os.getenv("REDDIT_CLIENT_ID"),
+                     client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+                     password=os.getenv("REDDIT_PASSWORD"),
+                     user_agent=user_agent,
+                     username=os.getenv("REDDIT_USERNAME"))
+    start = time.time()
+    subreddits_info = pd.DataFrame()
+    for sub in subs:
+        now = time.time()
+        if now-start < 1:
+            time.sleep(0.1)
+            now=time.time()
+        subreddit_info = reddit.subreddit(sub)
 
 # get_subreddit_info()
 # save_comments_per_day_csv()
