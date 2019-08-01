@@ -13,17 +13,10 @@ from plotly.graph_objs import *
 
 from app import app, server
 
-def submissions_per_day():
-    df = pd.read_csv(
-    'https://raw.githubusercontent.com/sub-stats/ds/master/past_90_days_post_per_day.csv')
+def submissions_per_day(subreddit="askreddit"):
+    df = pd.read_csv('https://raw.githubusercontent.com/sub-stats/ds/master/past_90_days_post_per_day.csv')
 
-
-    df = df[df['subreddit'] == "askreddit"]
-
-
-    ##Can do it this way to display all subs on 1 graph
-    # fig = px.line(df, x='date', y='posts_count', color='subreddit', template="plotly_dark",
-    #     line_shape="spline")
+    df = df[df['subreddit'] == subreddit]
 
     layout = Layout(
         paper_bgcolor='rgba(0,0,0,0)',
@@ -72,11 +65,11 @@ def submissions_per_day():
 
     return fig
 
-def comments_per_day():
+def comments_per_day(subreddit='askreddit'):
     df = pd.read_csv('https://raw.githubusercontent.com/sub-stats/ds/master/past_90_days_comments_per_day.csv')
 
 
-    df = df[df['subreddit'] == "askreddit"]
+    df = df[df['subreddit'] == subreddit]
 
 
     ##Can do it this way to display all subs on 1 graph
@@ -137,14 +130,40 @@ app.layout = html.Div([
 ])
 
 @app.callback(Output('graph', 'figure'),
-              [Input('url', 'pathname')])
-def display_graph(pathname):
-    # split_path = pathname.split('/')
-    # print(split_path)
-    if pathname == '/submissions-per-day':
-        return submissions_per_day()
-    elif pathname == '/comments-per-day':
-        return comments_per_day()
+              [Input('url', 'pathname'), Input('url', 'search')])
+def display_graph(pathname, search):
+    queries_list = []
+    query_dict = {}
+    if search != None:
+        queries = search[1:]
+        print(queries)
+        if queries.find('&') > 0:
+            queries_list = queries.split('&')
+            
+            if len(queries_list) > 0:
+                for i in range(len(queries_list)):
+                    new_item = queries_list[i].split('=')
+                    print('adding item')
+                    query_dict[new_item[0]] = new_item[1]
+        else:
+            print('one item')
+            new_item = queries.split('=')
+            query_dict[new_item[0]] = new_item[1]
+        print(query_dict)
+    if pathname != None:
+        split_path = pathname.split('/')
+        graph_name = split_path[1]
+        if len(split_path) > 2:
+            subreddit = split_path[2]
+            print(subreddit)
+            if graph_name == 'submissions-per-day':
+                return submissions_per_day(subreddit)
+            elif graph_name == 'comments-per-day':
+                return comments_per_day(subreddit)
+        if graph_name == 'submissions-per-day':
+            return submissions_per_day()
+        elif graph_name == 'comments-per-day':
+            return comments_per_day()
 
 if __name__ == '__main__':
     app.run_server(debug=True)
