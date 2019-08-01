@@ -13,10 +13,16 @@ from plotly.graph_objs import *
 
 from app import app, server
 
-def submissions_per_day(subreddit="askreddit"):
+def submissions_per_day(graph_options):
+    subreddit = graph_options['subreddit']
+    start = graph_options['start']
+    end = graph_options['end']
+
     df = pd.read_csv('https://raw.githubusercontent.com/sub-stats/ds/master/past_90_days_post_per_day.csv')
 
     df = df[df['subreddit'] == subreddit]
+
+    df = df[(df['date'] > start) & (df['date'] < end)]
 
     layout = Layout(
         paper_bgcolor='rgba(0,0,0,0)',
@@ -65,13 +71,21 @@ def submissions_per_day(subreddit="askreddit"):
 
     return fig
 
-def comments_per_day(subreddit='askreddit'):
+def comments_per_day(graph_options):
     df = pd.read_csv('https://raw.githubusercontent.com/sub-stats/ds/master/past_90_days_comments_per_day.csv')
 
+    subreddit = graph_options['subreddit']
+    start = graph_options['start']
+    end = graph_options['end']
+
+    print(subreddit)
+    print(start)
 
     df = df[df['subreddit'] == subreddit]
 
-
+    df['date'] = pd.to_datetime(df['date'])
+    df = df[(df['date'] > start) & (df['date'] < end)]
+    print(df.shape)
     ##Can do it this way to display all subs on 1 graph
     # fig = px.line(df, x='date', y='posts_count', color='subreddit', template="plotly_dark",
     #     line_shape="spline")
@@ -151,19 +165,11 @@ def display_graph(pathname, search):
             query_dict[new_item[0]] = new_item[1]
         print(query_dict)
     if pathname != None:
-        split_path = pathname.split('/')
-        graph_name = split_path[1]
-        if len(split_path) > 2:
-            subreddit = split_path[2]
-            print(subreddit)
-            if graph_name == 'submissions-per-day':
-                return submissions_per_day(subreddit)
-            elif graph_name == 'comments-per-day':
-                return comments_per_day(subreddit)
-        if graph_name == 'submissions-per-day':
-            return submissions_per_day()
-        elif graph_name == 'comments-per-day':
-            return comments_per_day()
+        if pathname == '/submissions-per-day':
+            return submissions_per_day(query_dict)
+        elif pathname == '/comments-per-day':
+            return comments_per_day(query_dict)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
