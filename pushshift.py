@@ -4,11 +4,43 @@ import requests
 import pandas as pd
 import os
 import praw
+from psaw import PushshiftAPI
 from dotenv import load_dotenv
 
 load_dotenv()
 
+subs = ['askreddit', 'askscience', 'askhistorians', 'explainlikeimfive', 'askcomputerscience', 'askculinary',
+        'trueaskreddit', 'asksocialscience', 'askengineers', 'askphilosophy']
+# user_agent = "LambdaAnalysisClient/0.1 by " + os.getenv("REDDIT_USERNAME")
 
+def unique_users_per_day(subreddit, start, end):
+    # r = praw.Reddit(client_id=os.getenv("REDDIT_CLIENT_ID"),
+    #                 client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    #                 password=os.getenv("REDDIT_PASSWORD"),
+    #                 user_agent=user_agent,
+    #                 username=os.getenv("REDDIT_USERNAME"))
+    api = PushshiftAPI()
+    gen = api.search_submissions(subreddit=subreddit, aggs='author',
+                     after=start, before=end)
+    next(gen)
+    users = len(list(gen))
+    return { "subreddit": [subreddit], 'unique_users': [users], 'date': [datetime.datetime.today() - datetime.timedelta(days=int(start[:-1]))]}
+
+def scrape_unique_users():
+    unique_users = pd.DataFrame()
+    for sub in subs:
+        print("Starting " + sub)
+        for i in range(0, 90):
+            before = str(i) + "d"
+            after = str(i+1) + "d"
+            new_day = pd.DataFrame(unique_users_per_day(sub, after, before))
+            print(new_day.head())
+            unique_users = unique_users.append(new_day)
+    return unique_users
+
+test = scrape_unique_users()
+print(test.head())
+test.to_csv('past_90_days_unique_users_per_day.csv')
 """
     Returns submissions from Pushshift API.
     Subreddit must be a string and a valid subreddit.
@@ -28,9 +60,6 @@ def search_submissions(subreddit, after, before, start):
     sub_df = pd.DataFrame(submissions['data'])
     start = time.time()
     return sub_df.copy()
-
-subs = ['askreddit', 'askscience', 'askhistorians', 'eli5', 'askcomputerscience', 'askculinary',
-        'trueaskreddit', 'asksocialscience', 'askengineers', 'askphilosophy']
 
 def scrape_submissions():
     start = time.time()
@@ -112,6 +141,8 @@ def get_subreddit_comments_per_day(subreddit, start):
     # daily_aggs = daily_aggs.drop(columns='Unnamed: 0')
     # daily_aggs = daily_aggs.rename(columns={'doc_count': 'comment_count', 'key': 'date'})
     return daily_aggs
+
+
 
 def get_subreddit_unique_users():
     pass
